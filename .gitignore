@@ -1,0 +1,28 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+env/
+venv/
+.venv/
+
+# PyCharm project files (if you are using PyCharm)
+.idea/
+
+# VS Code settings (if using Visual Studio Code)
+.vscode/
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# OS generated files
+.DS_Store # For macOS
+Thumbs.db # For Windows
+
+# Python distribution artifacts
+*.egg-info/
+dist/
+build/
+lib/
