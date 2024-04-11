@@ -1,4 +1,4 @@
-import { Client, connect } from 'stompit';
+import { connect } from 'stompit';
 import { connectOptions } from './utils';
 
 export async function test(id: string = '') {
