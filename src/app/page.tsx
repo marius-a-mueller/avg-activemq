@@ -14,12 +14,12 @@ export default function Page() {
     <div className="flex justify-center items-center">
       <Card className="h-[600px] w-[800px] mt-20">
         <CardHeader>
-          <CardTitle> Prepare your message</CardTitle>
+          <CardTitle>Stock Message Broker</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <Label>Message</Label>
-          <Input value={message} onChange={(e: any) => setMessage(e)} />
-          <Button onClick={() => fetch('/api/broker')}>Send Message</Button>
+          <Button onClick={() => fetch('/api/stockholder')}>Start Stockholder</Button>
+          <Button onClick={() => fetch('/api/stockmarket')}>Start Stockmarket</Button>
+          <Button onClick={() => fetch('/api/stockmarketservice')}>Start StockMarketService</Button>
         </CardContent>
       </Card>
     </div>
