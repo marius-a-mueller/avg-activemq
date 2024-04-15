@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export const connectOptions = {
   host: 'localhost',
-  port: 61616,
+  port: 61613,
   connectHeaders: {
     host: '/',
     login: 'artemis',
