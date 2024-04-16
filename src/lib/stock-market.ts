@@ -38,7 +38,7 @@ export async function listenM(id: number) {
         }
         if (body) {
           const[hid, sym, price] = body.split(';');
-          console.log(`Börse(${id}): Order von ${sym} ausgeführt von Holder: : ${hid} zum Preis: $price`);
+          console.log(`Börse(${id}): Order von ${sym} ausgeführt von Holder: : ${hid} zum Preis: ${price}`);
         }
         
       });
