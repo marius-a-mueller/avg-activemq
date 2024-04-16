@@ -1,6 +1,8 @@
 import { connect } from 'stompit';
 import { connectOptions } from './utils';
 
+const stocks = [];
+
 export async function start(id: number) {
   function log(text: string) {
     console.log('stockholder ' + id + ': ' + text);
@@ -10,7 +12,7 @@ export async function start(id: number) {
   }
 
   connect(connectOptions, function (err, client) {
-    log('start')
+    log('start');
     if (err) {
       error('connect error ' + err.message);
       return;

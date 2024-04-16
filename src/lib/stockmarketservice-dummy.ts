@@ -14,11 +14,11 @@ export async function start(id: string = '') {
       error('connect error ' + err.message);
       return;
     }
-    const address = '/topic/StockholderPrices';
 
     try {
       setInterval(() => {
         const i = 1;
+        const address = '/topic/StockholderPrices';
         const sendHeaders = {
           destination: address,
           'content-type': 'text/plain',
@@ -30,7 +30,7 @@ export async function start(id: string = '') {
         frame.write(message);
         frame.end();
         log(`${address}: sent message: ${message}`);
-      }, 5000);
+      }, 50);
     } catch (e) {
       error('ERROR');
     }
