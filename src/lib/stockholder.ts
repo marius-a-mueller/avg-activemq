@@ -1,7 +1,7 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
 import { Stock } from './stock';
-import { stockMarket } from './stockMarket';
+import { stockMarket } from './stock-market';
 
 const stocks: Stock[] = [];
 

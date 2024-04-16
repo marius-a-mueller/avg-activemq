@@ -1,4 +1,4 @@
-import { addMarket } from "@/lib/stockMarket";
+import { addMarket } from '@/lib/stock-market';
 let count = 0;
 export function GET() {
   addMarket();

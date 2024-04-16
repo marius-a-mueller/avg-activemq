@@ -1,4 +1,4 @@
-import { startStockMarketService } from '@/lib/stockMarketService';
+import { startStockMarketService } from '@/lib/stock-market-service';
 
 export function GET() {
   startStockMarketService();
