@@ -7,14 +7,14 @@ const base = ['MSFT;', 'AAPL;', 'NVDA;', 'AMZN;'];
 let exchangeNum = 0;
 
 export async function addMarket() {
-  await stockMarket(exchangeNum);
+   stockMarket(exchangeNum);
   exchangeNum += 1;
 }
 
-export async function listenM(id: number) {
+export function listenM(id: number) {
   console.log(`Listening to queue: /queue/Orders${id}`);
 
-  connect(connectOptions, async function (error, client) {
+  connect(connectOptions, function (error, client) {
     if (error) {
       console.error(`Error connecting to the broker: ${error.message}`);
       return;
@@ -42,7 +42,7 @@ export async function listenM(id: number) {
   });
 }
 
-export async function stockMarket(id: number) {
+export function stockMarket(id: number) {
   // listenM(id);
   console.log('Stock Exchange created with id: ' + id);
   const sendHeaders = {
