@@ -9,7 +9,7 @@ export async function startStockMarketService() {
   };
 
   const sendHeaders = {
-    destination: '/topic/StockMarketService',
+    destination: '/topic/StockholderPrice',
   };
 
   connect(connectOptions, async function (error, client) {
