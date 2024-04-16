@@ -71,7 +71,7 @@ export function stockMarket(id: number) {
   const messages: string[] = [];
   connect(connectOptions, function (error, client) {
     const intervalId = setInterval(() => {
-      console.log(count);
+      console.log('----------------');
       if (count >= 100000) {
         clearInterval(intervalId);
         return;
@@ -83,6 +83,7 @@ export function stockMarket(id: number) {
       }
 
       // creating the messages
+      //TODO fix
       for (let i = 0; i < 1; i++) {
         course[i] = course[i] * (0.8 + Math.random() * 0.4); //
         messages.push(id + ';' + symbols[i] + ";" + course[i].toFixed(2));
@@ -97,6 +98,5 @@ export function stockMarket(id: number) {
       messages.splice(0, messages.length);
       count += 1;
     }, 4000);
-    client.disconnect();
   });
 }
