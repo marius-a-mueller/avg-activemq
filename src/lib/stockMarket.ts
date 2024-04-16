@@ -1,9 +1,8 @@
-//TODO Connection zu stomp schließt nach so 10 Iterationen
 // Consume Orders
 import { connect } from 'stompit';
 import { connectOptions } from './utils';
+import { symbols } from './symbols';
 const course = [421, 176, 881, 170];
-const base = ['MSFT;', 'AAPL;', 'NVDA;', 'AMZN;'];
 let exchangeNum = 0;
 
 export async function addMarket() {
@@ -65,9 +64,9 @@ export function stockMarket(id: number) {
       }
 
       // creating the messages
-      for (let i = 0; i < base.length; i++) {
+      for (let i = 0; i < symbols.length; i++) {
         course[i] = course[i] * (0.8 + Math.random() * 0.2); //
-        messages.push(id + ';' + base[i] + course[i].toFixed(2));
+        messages.push(id + ';' + symbols[i] + ";" + course[i].toFixed(2));
       }
       // sending the messages to the queue
       messages.forEach((message) => {
@@ -78,7 +77,7 @@ export function stockMarket(id: number) {
       // CLR
       messages.splice(0, messages.length);
       count += 1;
-    }, 500);
+    }, 2500);
     //client.disconnect();
   });
 }
