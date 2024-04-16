@@ -16,9 +16,40 @@ await stockMarket(exchangeNum);
 exchangeNum +=1;
 }
 
+export async function listenM(id: number) {
+  console.log(`Listening to queue: /queue/Orders${id}`);
+
+  connect(connectOptions, async function(error, client) {
+    if (error) {
+      console.error(`Error connecting to the broker: ${error.message}`);
+      return;
+    }
+
+    const subscribeHeaders = {
+      destination: `/queue/Orders${id}`,
+      ack: 'client-individual', // TODO needed?
+    };
+
+    client.subscribe(subscribeHeaders, function(error, message) {
+      if (error) {
+        console.error(`Couldn't subscribe to the queue: ${error.message}`);
+        return;
+      }
+
+      message.readString('utf-8', function(error, body) {
+        if (error) {
+          console.error(`Error while reading the message: ${error.message}`);
+          return;
+        }
+        console.log(`Order ausgeführt: /queue/Orders${id}: ${body}`);
+      });
+    });
+  });
+}
+
 export async function stockMarket(id: number) {
+  listenM(id);
   console.log("Stock Exchange created with id: " + id);
-    
         const sendHeaders = {
             destination: '/queue/StockMarketPrices',
             'content-type': 'text/plain',
@@ -37,10 +68,12 @@ export async function stockMarket(id: number) {
                   return;
               }
 
+            // creating the messages
             for (let i= 0; i < base.length; i++) {
               course[i] = course[i] * (0.75 + Math.random() * 0.5);
               messages.push(id +";"+ base[i]+ course[i].toFixed(2));
             }
+            // sending the messages to the queue
             messages.forEach(message => {
                 const frame = client.send(sendHeaders);
                 frame.write(message);
@@ -50,6 +83,6 @@ export async function stockMarket(id: number) {
             messages.splice(0, messages.length);
             count += 1;
             client.disconnect();
-        })}, 1000);
+        })}, 10000);
     
 }

@@ -10,6 +10,7 @@ export async function start(id: number) {
   }
 
   connect(connectOptions, function (err, client) {
+    log('start')
     if (err) {
       error('connect error ' + err.message);
       return;
