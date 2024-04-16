@@ -15,8 +15,11 @@ export async function start(id: number) {
       return;
     }
 
+    const topicAddress = '/topic/StockholderPrices';
+
     const subscribeHeaders = {
-      destination: '/topic/StockholderPrices',
+      destination: topicAddress,
+      ack: 'client-individual',
     };
 
     try {
@@ -32,17 +35,18 @@ export async function start(id: number) {
           }
           if (body) {
             const [stockmarket, symbol, price] = body.split(';');
-            log('received message: ' + body);
+            log(`${topicAddress}: received message: ${body}`);
+            const queueAddress = `/queue/Orders${stockmarket}`;
             const sendHeaders = {
-              destination: `/queue/Orders${stockmarket}`,
+              destination: queueAddress,
               'content-type': 'text/plain',
             };
 
             const frame = client.send(sendHeaders);
             frame.write(`${symbol};${price}`);
             frame.end();
-            log(`sent message: ${symbol};${price}`);
-            //client.ack(message);
+            log(`${queueAddress}: sent message: ${symbol};${price}`);
+            message.ack();
           }
         });
       });
