@@ -96,6 +96,7 @@ function buyStock(
     price,
     quantity: 1,
     date: new Date(),
+    ack: false,
   };
   purchases.push(purchase);
 }

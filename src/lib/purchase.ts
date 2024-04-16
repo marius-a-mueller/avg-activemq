@@ -5,4 +5,5 @@ export interface Purchase {
   quantity: number;
   price: number;
   date: Date;
+  ack: boolean;
 }
