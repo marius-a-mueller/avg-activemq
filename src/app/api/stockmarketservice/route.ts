@@ -1,6 +1,6 @@
 import { startStockMarketService } from '@/lib/stockMarketService';
 
 export function GET() {
-  getStockMarketService();
+  startStockMarketService();
   return new Response('OK');
 }
