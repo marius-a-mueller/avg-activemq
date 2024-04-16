@@ -10,7 +10,7 @@ export async function addMarket() {
   exchangeNum += 1;
 }
 
-export function listenM(id: number) {
+export async function listenM(id: number) {
   console.log(`Listening to queue: /queue/Orders${id}`);
 
   connect(connectOptions, function (error, client) {
@@ -23,6 +23,7 @@ export function listenM(id: number) {
       destination: `/queue/Orders${id}`,
       ack: 'client-individual', // TODO needed?
     };
+    try {
 
     client.subscribe(subscribeHeaders, function (error, message) {
       if (error) {
@@ -35,14 +36,21 @@ export function listenM(id: number) {
           console.error(`Error while reading the message: ${error.message}`);
           return;
         }
-        console.log(`Order ausgeführt: /queue/Orders${id}: ${body}`);
+        if (body) {
+          const[hid, sym, price] = body.split(';');
+          console.log(`Börse(${id}): Order von ${sym} ausgeführt von Holder: : ${hid} zum Preis: $price`);
+        }
+        
       });
     });
+  } catch (err) {
+    console.log('Error while subscribing');
+  }
   });
 }
 
 export function stockMarket(id: number) {
-  // listenM(id);
+  listenM(id);
   console.log('Stock Exchange created with id: ' + id);
   const sendHeaders = {
     destination: '/queue/StockMarketPrices',
@@ -77,7 +85,7 @@ export function stockMarket(id: number) {
       // CLR
       messages.splice(0, messages.length);
       count += 1;
-    }, 2500);
+    }, 4000);
     //client.disconnect();
   });
 }
