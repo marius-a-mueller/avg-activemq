@@ -1,7 +1,9 @@
-import { connect } from 'stompit';
+import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
+import { Stock } from './stock';
+import { stockMarket } from './stockMarket';
 
-const stocks = [];
+const stocks: Stock[] = [];
 
 export async function start(id: number) {
   function log(text: string) {
@@ -36,25 +38,55 @@ export async function start(id: number) {
             error('read message error ' + err.message);
             return;
           }
-          if (body) {
-            const [stockmarket, symbol, price] = body.split(';');
-            log(`${topicAddress}: received message: ${body}`);
-            const queueAddress = `/queue/Orders${stockmarket}`;
-            const sendHeaders = {
-              destination: queueAddress,
-              'content-type': 'text/plain',
-            };
+          if (!body) return;
+          log(`${topicAddress}: received message: ${body}`);
+          const [stockmarket, symbol, price] = body.split(';');
 
-            const frame = client.send(sendHeaders);
-            frame.write(`${symbol};${price}`);
-            frame.end();
-            log(`${queueAddress}: sent message: ${symbol};${price}`);
-            message.ack();
+          // buy first stock of every symbol
+          if (!stocks.find((stock) => stock.symbol === symbol)) {
+            buyStock(client, id, Number(stockmarket), symbol, Number(price));
+            log(`sent message: ${symbol};${price}`);
+          } else if (Math.random() < 0.1) {
+            buyStock(client, id, Number(stockmarket), symbol, Number(price));
+            log(`sent message: ${symbol};${price}`);
           }
+
+          client.ack(message);
         });
       });
     } catch (e) {
       log('ERROR');
     }
   });
+}
+
+function buyStock(
+  client: Client,
+  id: number,
+  stockmarket: number,
+  symbol: string,
+  price: number,
+) {
+  const queueAddress = `/queue/Orders${stockmarket}`;
+  const sendHeaders = {
+    destination: queueAddress,
+    'content-type': 'text/plain',
+  };
+
+  const frame = client.send(sendHeaders);
+  frame.write(`${id};${symbol};${price}`);
+  frame.end();
+
+  const ownedStock = stocks.find((stock) => stock.symbol === symbol);
+  if (ownedStock) {
+    ownedStock.quantity++;
+    return;
+  }
+
+  const stock: Stock = {
+    symbol,
+    price,
+    quantity: 1,
+  };
+  stocks.push(stock);
 }
