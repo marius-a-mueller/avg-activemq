@@ -1,6 +1,15 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
-import { Order } from './order';
+import { symbols } from './symbols';
+
+export interface Order {
+  symbol: (typeof symbols)[number];
+  quantity: number;
+  price: number;
+  date: Date;
+  ack: boolean;
+  id: number;
+}
 
 const orders: Order[] = [];
 let orderId = 0;
@@ -85,13 +94,10 @@ export async function start(id: number) {
         }
         if (!body) return;
         log(`/queue/Ack${id}: received message: ${body}`);
-        const [symbol, price] = body.split(';');
-        const order = orders.find(
-          (order) => order.symbol === symbol && order.price === Number(price),
-        );
+        const order = orders.find((order) => order.id === Number(body));
         if (order) {
           order.ack = true;
-          log(`acknowledged order: ${symbol};${price}`);
+          log(`acknowledged order: ${body}`);
         }
 
         client.ack(message);
@@ -124,6 +130,7 @@ function buyStock(
     quantity: 1,
     date: new Date(),
     ack: false,
+    id: orderId,
   };
   orders.push(order);
   orderId++;
