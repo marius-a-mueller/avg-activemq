@@ -1,9 +1,6 @@
-import { start } from '@/lib/stockmarketservice-dummy';
-
-let i = 0;
+import { startStockMarketService } from '@/lib/stockMarketService';
 
 export function GET() {
-  start(`${i}`);
-  i++;
+  startStockMarketService();
   return new Response('OK');
 }
