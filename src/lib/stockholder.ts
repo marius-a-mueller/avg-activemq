@@ -1,9 +1,8 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
-import { Stock } from './stock';
-import { stockMarket } from './stock-market';
+import { Purchase } from './purchase';
 
-const stocks: Stock[] = [];
+const purchases: Purchase[] = [];
 
 export async function start(id: number) {
   function log(text: string) {
@@ -41,13 +40,27 @@ export async function start(id: number) {
           if (!body) return;
           log(`${topicAddress}: received message: ${body}`);
           const [stockmarket, symbol, price] = body.split(';');
-
+          const quantity = Math.floor(Math.random() * 10) + 1;
           // buy first stock of every symbol
-          if (!stocks.find((stock) => stock.symbol === symbol)) {
-            buyStock(client, id, Number(stockmarket), symbol, Number(price));
+          if (!purchases.find((purchase) => purchase.symbol === symbol)) {
+            buyStock(
+              client,
+              id,
+              quantity,
+              Number(stockmarket),
+              symbol,
+              Number(price),
+            );
             log(`sent message: ${symbol};${price}`);
           } else if (Math.random() < 0.1) {
-            buyStock(client, id, Number(stockmarket), symbol, Number(price));
+            buyStock(
+              client,
+              id,
+              quantity,
+              Number(stockmarket),
+              symbol,
+              Number(price),
+            );
             log(`sent message: ${symbol};${price}`);
           }
 
@@ -55,7 +68,7 @@ export async function start(id: number) {
         });
       });
     } catch (e) {
-      log('ERROR');
+      log('Stockholder error while subscribing');
     }
   });
 }
@@ -64,6 +77,7 @@ function buyStock(
   client: Client,
   id: number,
   stockmarket: number,
+  quantity: number,
   symbol: string,
   price: number,
 ) {
@@ -74,19 +88,14 @@ function buyStock(
   };
 
   const frame = client.send(sendHeaders);
-  frame.write(`${id};${symbol};${price}`);
+  frame.write(`${id};${quantity};${symbol};${price}`);
   frame.end();
 
-  const ownedStock = stocks.find((stock) => stock.symbol === symbol);
-  if (ownedStock) {
-    ownedStock.quantity++;
-    return;
-  }
-
-  const stock: Stock = {
+  const purchase: Purchase = {
     symbol,
     price,
     quantity: 1,
+    date: new Date(),
   };
-  stocks.push(stock);
+  purchases.push(purchase);
 }

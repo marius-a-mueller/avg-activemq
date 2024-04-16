@@ -1,7 +1,8 @@
 import { symbols } from './symbols';
 
-export interface Stock {
+export interface Purchase {
   symbol: (typeof symbols)[number];
-  price: number;
   quantity: number;
+  price: number;
+  date: Date;
 }
