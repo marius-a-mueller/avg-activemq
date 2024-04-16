@@ -48,21 +48,22 @@ export async function listenM(id: number) {
 }
 
 export async function stockMarket(id: number) {
-  listenM(id);
+  // listenM(id);
   console.log("Stock Exchange created with id: " + id);
         const sendHeaders = {
-            destination: '/queue/StockMarketPrices',
+            destination:'/queue/StockMarketPrices',
             'content-type': 'text/plain',
         };
         let count = 0;
         const messages: string[] = [];
+        connect(connectOptions, function (error, client) {
         const intervalId = setInterval(() => {
           console.log(count);
             if (count >= 100000) {
                 clearInterval(intervalId);
                 return;
             }
-            connect(connectOptions, async function (error, client) {
+            
               if (error) {
                   console.log(id + ': connect error ' + error.message);
                   return;
@@ -70,7 +71,7 @@ export async function stockMarket(id: number) {
 
             // creating the messages
             for (let i= 0; i < base.length; i++) {
-              course[i] = course[i] * (0.75 + Math.random() * 0.5);
+              course[i] = course[i] * (0.8 + Math.random() * 0.2); // 
               messages.push(id +";"+ base[i]+ course[i].toFixed(2));
             }
             // sending the messages to the queue
@@ -82,7 +83,9 @@ export async function stockMarket(id: number) {
             // CLR
             messages.splice(0, messages.length);
             count += 1;
-            client.disconnect();
-        })}, 10000);
-    
+            
+        }, 500);
+        //client.disconnect();
+      });
+      
 }
