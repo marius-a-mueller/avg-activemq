@@ -1,9 +1,18 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
-import { Stock } from './stock';
-import { stockMarket } from './stock-market';
+import { symbols } from './symbols';
 
-const stocks: Stock[] = [];
+export interface Order {
+  symbol: (typeof symbols)[number];
+  quantity: number;
+  price: number;
+  date: Date;
+  ack: boolean;
+  id: number;
+}
+
+const orders: Order[] = [];
+let orderId = 0;
 
 export async function start(id: number) {
   function log(text: string) {
@@ -27,36 +36,73 @@ export async function start(id: number) {
       ack: 'client-individual',
     };
 
-    try {
-      client.subscribe(subscribeHeaders, function (err, message) {
+    client.subscribe(subscribeHeaders, function (err, message) {
+      if (err) {
+        log('subscribe error ' + err.message);
+        return;
+      }
+      message.readString('utf-8', function (err, body) {
         if (err) {
-          log('subscribe error ' + err.message);
+          error('read message error ' + err.message);
           return;
         }
-        message.readString('utf-8', function (err, body) {
-          if (err) {
-            error('read message error ' + err.message);
-            return;
-          }
-          if (!body) return;
-          log(`${topicAddress}: received message: ${body}`);
-          const [stockmarket, symbol, price] = body.split(';');
+        if (!body) return;
+        log(`${topicAddress}: received message: ${body}`);
+        const [stockmarket, symbol, price] = body.split(';');
+        const quantity = Math.floor(Math.random() * 10) + 1;
+        // buy first stock of every symbol
+        if (!orders.find((order) => order.symbol === symbol)) {
+          buyStock(
+            client,
+            id,
+            quantity,
+            Number(stockmarket),
+            symbol,
+            Number(price),
+          );
+          log(`sent message: ${symbol};${price}`);
+        } else if (Math.random() < 0.1) {
+          buyStock(
+            client,
+            id,
+            quantity,
+            Number(stockmarket),
+            symbol,
+            Number(price),
+          );
+          log(`sent message: ${symbol};${price}`);
+        }
 
-          // buy first stock of every symbol
-          if (!stocks.find((stock) => stock.symbol === symbol)) {
-            buyStock(client, id, Number(stockmarket), symbol, Number(price));
-            log(`sent message: ${symbol};${price}`);
-          } else if (Math.random() < 0.1) {
-            buyStock(client, id, Number(stockmarket), symbol, Number(price));
-            log(`sent message: ${symbol};${price}`);
-          }
-
-          client.ack(message);
-        });
+        client.ack(message);
       });
-    } catch (e) {
-      log('ERROR');
-    }
+    });
+
+    const ackSubscribeHeaders = {
+      destination: `/queue/Ack${id}`,
+      ack: 'client-individual',
+    };
+
+    client.subscribe(subscribeHeaders, function (err, message) {
+      if (err) {
+        log('subscribe error ' + err.message);
+        return;
+      }
+      message.readString('utf-8', function (err, body) {
+        if (err) {
+          error('read message error ' + err.message);
+          return;
+        }
+        if (!body) return;
+        log(`/queue/Ack${id}: received message: ${body}`);
+        const order = orders.find((order) => order.id === Number(body));
+        if (order) {
+          order.ack = true;
+          log(`acknowledged order: ${body}`);
+        }
+
+        client.ack(message);
+      });
+    });
   });
 }
 
@@ -64,6 +110,7 @@ function buyStock(
   client: Client,
   id: number,
   stockmarket: number,
+  quantity: number,
   symbol: string,
   price: number,
 ) {
@@ -74,19 +121,17 @@ function buyStock(
   };
 
   const frame = client.send(sendHeaders);
-  frame.write(`${id};${symbol};${price}`);
+  frame.write(`${id};${orderId};${quantity};${symbol};${price}`);
   frame.end();
 
-  const ownedStock = stocks.find((stock) => stock.symbol === symbol);
-  if (ownedStock) {
-    ownedStock.quantity++;
-    return;
-  }
-
-  const stock: Stock = {
+  const order: Order = {
     symbol,
     price,
     quantity: 1,
+    date: new Date(),
+    ack: false,
+    id: orderId,
   };
-  stocks.push(stock);
+  orders.push(order);
+  orderId++;
 }
