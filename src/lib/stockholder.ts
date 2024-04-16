@@ -1,8 +1,9 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
-import { Purchase } from './purchase';
+import { Order } from './order';
 
-const purchases: Purchase[] = [];
+const orders: Order[] = [];
+let orderId = 0;
 
 export async function start(id: number) {
   function log(text: string) {
@@ -26,50 +27,76 @@ export async function start(id: number) {
       ack: 'client-individual',
     };
 
-    try {
-      client.subscribe(subscribeHeaders, function (err, message) {
+    client.subscribe(subscribeHeaders, function (err, message) {
+      if (err) {
+        log('subscribe error ' + err.message);
+        return;
+      }
+      message.readString('utf-8', function (err, body) {
         if (err) {
-          log('subscribe error ' + err.message);
+          error('read message error ' + err.message);
           return;
         }
-        message.readString('utf-8', function (err, body) {
-          if (err) {
-            error('read message error ' + err.message);
-            return;
-          }
-          if (!body) return;
-          log(`${topicAddress}: received message: ${body}`);
-          const [stockmarket, symbol, price] = body.split(';');
-          const quantity = Math.floor(Math.random() * 10) + 1;
-          // buy first stock of every symbol
-          if (!purchases.find((purchase) => purchase.symbol === symbol)) {
-            buyStock(
-              client,
-              id,
-              quantity,
-              Number(stockmarket),
-              symbol,
-              Number(price),
-            );
-            log(`sent message: ${symbol};${price}`);
-          } else if (Math.random() < 0.1) {
-            buyStock(
-              client,
-              id,
-              quantity,
-              Number(stockmarket),
-              symbol,
-              Number(price),
-            );
-            log(`sent message: ${symbol};${price}`);
-          }
+        if (!body) return;
+        log(`${topicAddress}: received message: ${body}`);
+        const [stockmarket, symbol, price] = body.split(';');
+        const quantity = Math.floor(Math.random() * 10) + 1;
+        // buy first stock of every symbol
+        if (!orders.find((order) => order.symbol === symbol)) {
+          buyStock(
+            client,
+            id,
+            quantity,
+            Number(stockmarket),
+            symbol,
+            Number(price),
+          );
+          log(`sent message: ${symbol};${price}`);
+        } else if (Math.random() < 0.1) {
+          buyStock(
+            client,
+            id,
+            quantity,
+            Number(stockmarket),
+            symbol,
+            Number(price),
+          );
+          log(`sent message: ${symbol};${price}`);
+        }
 
-          client.ack(message);
-        });
+        client.ack(message);
       });
-    } catch (e) {
-      log('Stockholder error while subscribing');
-    }
+    });
+
+    const ackSubscribeHeaders = {
+      destination: `/queue/Ack${id}`,
+      ack: 'client-individual',
+    };
+
+    client.subscribe(subscribeHeaders, function (err, message) {
+      if (err) {
+        log('subscribe error ' + err.message);
+        return;
+      }
+      message.readString('utf-8', function (err, body) {
+        if (err) {
+          error('read message error ' + err.message);
+          return;
+        }
+        if (!body) return;
+        log(`/queue/Ack${id}: received message: ${body}`);
+        const [symbol, price] = body.split(';');
+        const order = orders.find(
+          (order) => order.symbol === symbol && order.price === Number(price),
+        );
+        if (order) {
+          order.ack = true;
+          log(`acknowledged order: ${symbol};${price}`);
+        }
+
+        client.ack(message);
+      });
+    });
   });
 }
 
@@ -88,15 +115,16 @@ function buyStock(
   };
 
   const frame = client.send(sendHeaders);
-  frame.write(`${id};${quantity};${symbol};${price}`);
+  frame.write(`${id};${orderId};${quantity};${symbol};${price}`);
   frame.end();
 
-  const purchase: Purchase = {
+  const order: Order = {
     symbol,
     price,
     quantity: 1,
     date: new Date(),
     ack: false,
   };
-  purchases.push(purchase);
+  orders.push(order);
+  orderId++;
 }

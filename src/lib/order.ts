@@ -1,6 +1,6 @@
 import { symbols } from './symbols';
 
-export interface Purchase {
+export interface Order {
   symbol: (typeof symbols)[number];
   quantity: number;
   price: number;
