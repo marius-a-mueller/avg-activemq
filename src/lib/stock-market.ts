@@ -34,7 +34,7 @@ export async function listenM(id: number) {
           }
           if (body) {
             const [hid, oid, quantity, sym, price] = body.split(';');
-            console.log(`Börse(${id}): Order von ${sym} ausgeführt von Holder: : ${hid} zum Preis: ${price}`);
+            console.log(`Börse(${id}): Order von ${sym} ${quantity}mal ausgeführt von Holder: : ${hid} zum Preis: ${price}`);
             ackStockPurchase(client, Number(hid), Number(oid));
           }
         });
@@ -48,7 +48,7 @@ export async function listenM(id: number) {
 function ackStockPurchase(
   client: Client,
   holder: number,
-  order : number,
+  oid : number,
 ) {
   const queueAddress= `/queue/Ack${holder}`
   const sendHeaders = {
@@ -56,7 +56,7 @@ function ackStockPurchase(
     'content-type': 'text/plain',
   };
   const frame = client.send(sendHeaders);
-  frame.write(`${order}`);
+  frame.write(`${oid}`);
   frame.end();
 }
 
@@ -84,7 +84,7 @@ export function stockMarket(id: number) {
 
       // creating the messages
       for (let i = 0; i < 1; i++) {
-        course[i] = course[i] * (0.8 + Math.random() * 0.2); //
+        course[i] = course[i] * (0.8 + Math.random() * 0.4); //
         messages.push(id + ';' + symbols[i] + ";" + course[i].toFixed(2));
       }
       // sending the messages to the queue
@@ -93,10 +93,10 @@ export function stockMarket(id: number) {
         frame.write(message);
         frame.end();
       });
-      // CLR
+      // CLR messages
       messages.splice(0, messages.length);
       count += 1;
     }, 4000);
-    //client.disconnect();
+    client.disconnect();
   });
 }
