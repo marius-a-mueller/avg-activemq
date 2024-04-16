@@ -17,9 +17,9 @@ export default function Page() {
           <CardTitle>Stock Message Broker</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-2">
-          <Button onClick={() => fetch('/api/stockholder')}>Start Stockholder</Button>
           <Button onClick={() => fetch('/api/stockmarket')}>Start Stockmarket</Button>
           <Button onClick={() => fetch('/api/stockmarketservice')}>Start StockMarketService</Button>
+          <Button onClick={() => fetch('/api/stockholder')}>Start Stockholder</Button>
         </CardContent>
       </Card>
     </div>
