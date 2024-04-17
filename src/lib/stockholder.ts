@@ -1,6 +1,8 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
 import { symbols } from './symbols';
+import { db } from './db';
+import { revalidatePath } from 'next/cache';
 
 export interface Order {
   symbol: (typeof symbols)[number];
@@ -8,11 +10,11 @@ export interface Order {
   price: number;
   date: Date;
   ack: boolean;
-  id: number;
+  orderId: number;
 }
 
 const orders: Order[] = [];
-let orderId = 0;
+let orderId = 1;
 
 export async function start(id: number) {
   function log(text: string) {
@@ -94,7 +96,7 @@ export async function start(id: number) {
         }
         if (!body) return;
         log(`/queue/Ack${id}: received message: ${body}`);
-        const order = orders.find((order) => order.id === Number(body));
+        const order = orders.find((order) => order.orderId === Number(body));
         if (order) {
           order.ack = true;
           log(`acknowledged order: ${body}`);
@@ -106,7 +108,7 @@ export async function start(id: number) {
   });
 }
 
-function buyStock(
+async function buyStock(
   client: Client,
   id: number,
   stockmarket: number,
@@ -124,14 +126,21 @@ function buyStock(
   frame.write(`${id};${orderId};${quantity};${symbol};${price}`);
   frame.end();
 
-  const order: Order = {
+  const order = {
     symbol,
     price,
     quantity: 1,
     date: new Date(),
     ack: false,
-    id: orderId,
+    orderId,
   };
   orders.push(order);
+
+  await db.order
+    .create({
+      data: order,
+    })
+    .then(() => revalidatePath('/'));
+
   orderId++;
 }
