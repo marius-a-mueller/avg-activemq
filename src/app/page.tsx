@@ -12,10 +12,11 @@ export default function Page() {
         <CardHeader>
           <CardTitle>Stock Message Broker</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <Button onClick={() => fetch('/api/stockmarket')}>Start Stockmarket</Button>
-          <Button onClick={() => fetch('/api/stockmarketservice')}>Start StockMarketService</Button>
-          <Button onClick={() => fetch('/api/stockholder')}>Start Stockholder</Button>
+        <CardContent className="flex flex-row gap-2">
+          <Button className="flex-1" onClick={() => fetch('/api/stockmarket')}>Start Stockmarket</Button>
+          <Button className="flex-1" onClick={() => fetch('/api/stockmarketservice')}>Start StockMarketService</Button>
+          <Button className="flex-1" onClick={() => fetch('/api/stockholder')}>Start Stockholder</Button>
+          <Button className="flex-2" onClick={() => fetch('/api/reset')}>RESET</Button>
         </CardContent>
       </Card>
     </div>
