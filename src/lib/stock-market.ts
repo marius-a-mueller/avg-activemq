@@ -1,15 +1,16 @@
-// Consume Orders
 import { connect, Client } from 'stompit';
 import { connectOptions } from './utils';
 import { symbols } from './symbols';
 const course = [421, 176, 881, 170];
 let exchangeNum = 0;
 
+// Create a new Stock Market
 export async function addMarket() {
   stockMarket(exchangeNum);
   exchangeNum += 1;
 }
 
+// The part of a Stock Market that waits for buy-orders
 export async function listenM(id: number) {
   console.log(`Listening to queue: /queue/Orders${id}`);
   connect(connectOptions, function (error, client) {
@@ -19,7 +20,7 @@ export async function listenM(id: number) {
     }
     const subscribeHeaders = {
       destination: `/queue/Orders${id}`,
-      ack: 'client-individual', // TODO needed?
+      ack: 'client-individual',
     };
     try {
       client.subscribe(subscribeHeaders, function (error, message) {
@@ -45,12 +46,13 @@ export async function listenM(id: number) {
   });
 }
 
+// Acknowledges the Purches of a stock by providing the Order-ID
 function ackStockPurchase(
   client: Client,
   holder: number,
-  oid : number,
+  oid: number,
 ) {
-  const queueAddress= `/queue/Ack${holder}`
+  const queueAddress = `/queue/Ack${holder}`
   const sendHeaders = {
     destination: queueAddress,
     'content-type': 'text/plain',
@@ -60,6 +62,7 @@ function ackStockPurchase(
   frame.end();
 }
 
+// The functionality of an individual Stockmarket
 export function stockMarket(id: number) {
   listenM(id);
   console.log('Stock Exchange created with id: ' + id);

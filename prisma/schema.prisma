@@ -17,3 +17,11 @@ model Order {
   ack       Boolean
   createdAt DateTime @default(now())
 }
+
+model Stock {
+  id        Int     @id @default(autoincrement())
+  marketId  Int
+  symbol    String
+  price     Float
+  createdAt DateTime @default(now())
+}
