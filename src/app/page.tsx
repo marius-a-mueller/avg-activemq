@@ -88,13 +88,13 @@ export default function Page() {
                     </TableCell>
                     <TableCell>{order.price.toString()}</TableCell>
                     <TableCell>{order.quantity}</TableCell>
-                    <TableCell>{Number(order.ack)}</TableCell>
+                    <TableCell>{String(order.ack)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={3}>Total:</TableCell>
+                  <TableCell colSpan={5}>Total:</TableCell>
                   <TableCell className="text-right">
                     {orders?.length} Orders
                   </TableCell>
