@@ -1,19 +1,9 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
-import { symbols } from './symbols';
 import { db } from './db';
 import { revalidatePath } from 'next/cache';
+import { Order } from '@prisma/client';
 
-export interface Order {
-  symbol: (typeof symbols)[number];
-  quantity: number;
-  price: number;
-  date: Date;
-  ack: boolean;
-  orderId: number;
-}
-
-const orders: Order[] = [];
 let orderId = 1;
 
 export async function start(id: number) {
@@ -53,17 +43,7 @@ export async function start(id: number) {
         const [stockmarket, symbol, price] = body.split(';');
         const quantity = Math.floor(Math.random() * 10) + 1;
         // buy first stock of every symbol
-        if (!orders.find((order) => order.symbol === symbol)) {
-          buyStock(
-            client,
-            id,
-            quantity,
-            Number(stockmarket),
-            symbol,
-            Number(price),
-          );
-          log(`sent message: ${symbol};${price}`);
-        } else if (Math.random() < 0.1) {
+        if (Math.random() < 0.1) {
           buyStock(
             client,
             id,
@@ -84,7 +64,7 @@ export async function start(id: number) {
       ack: 'client-individual',
     };
 
-    client.subscribe(subscribeHeaders, function (err, message) {
+    client.subscribe(ackSubscribeHeaders, function (err, message) {
       if (err) {
         log('subscribe error ' + err.message);
         return;
@@ -96,11 +76,13 @@ export async function start(id: number) {
         }
         if (!body) return;
         log(`/queue/Ack${id}: received message: ${body}`);
-        const order = orders.find((order) => order.orderId === Number(body));
-        if (order) {
-          order.ack = true;
-          log(`acknowledged order: ${body}`);
-        }
+
+        db.order.updateMany({
+          data: { ack: true },
+          where: { stockholderId: id, orderId: Number(body) },
+        });
+
+        log(`/queue/Ack${id}: ack order: ${body}`);
 
         client.ack(message);
       });
@@ -130,11 +112,9 @@ async function buyStock(
     symbol,
     price,
     quantity: 1,
-    date: new Date(),
-    ack: false,
+    stockholderId: id,
     orderId,
   };
-  orders.push(order);
 
   await db.order
     .create({

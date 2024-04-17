@@ -35,7 +35,9 @@ export async function listenM(id: number) {
           }
           if (body) {
             const [hid, oid, quantity, sym, price] = body.split(';');
-            console.log(`Börse(${id}): Order von ${sym} ${quantity}mal ausgeführt von Holder: : ${hid} zum Preis: ${price}`);
+            console.log(
+              `Börse(${id}): Order von ${sym} ${quantity}mal ausgeführt von Holder: : ${hid} zum Preis: ${price}`,
+            );
             ackStockPurchase(client, Number(hid), Number(oid));
           }
         });
@@ -47,16 +49,13 @@ export async function listenM(id: number) {
 }
 
 // Acknowledges the Purches of a stock by providing the Order-ID
-function ackStockPurchase(
-  client: Client,
-  holder: number,
-  oid: number,
-) {
-  const queueAddress = `/queue/Ack${holder}`
+function ackStockPurchase(client: Client, holder: number, oid: number) {
+  const queueAddress = `/queue/Ack${holder}`;
   const sendHeaders = {
     destination: queueAddress,
     'content-type': 'text/plain',
   };
+  console.log(`Acknowledge purchase of stock with Order-ID: ${oid}`);
   const frame = client.send(sendHeaders);
   frame.write(`${oid}`);
   frame.end();
@@ -89,7 +88,7 @@ export function stockMarket(id: number) {
       //TODO fix
       for (let i = 0; i < 1; i++) {
         course[i] = course[i] * (0.8 + Math.random() * 0.4); //
-        messages.push(id + ';' + symbols[i] + ";" + course[i].toFixed(2));
+        messages.push(id + ';' + symbols[i] + ';' + course[i].toFixed(2));
       }
       // sending the messages to the queue
       messages.forEach((message) => {

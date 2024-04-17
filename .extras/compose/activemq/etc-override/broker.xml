@@ -130,7 +130,7 @@ under the License.
 
       <critical-analyzer-timeout>120000</critical-analyzer-timeout>
 
-      <critical-analyzer-check-period>60000</critical-analyzer-check-period>
+      <critical-analyzer-check-period>6000000</critical-analyzer-check-period>
 
       <critical-analyzer-policy>HALT</critical-analyzer-policy>
 

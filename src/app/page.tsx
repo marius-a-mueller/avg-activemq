@@ -64,25 +64,31 @@ export default function Page() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>ID</TableHead>
                   <TableHead className="w-[100px]">Name</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Price</TableHead>
                   <TableHead>Quantity</TableHead>
+                  <TableHead>Ack</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody className="h-[400px] overflow-auto">
                 {orders?.map((order) => (
                   <TableRow className="h-14" key={order.id}>
                     <TableCell className="font-medium">
+                      {order.stockholderId}
+                    </TableCell>
+                    <TableCell className="font-medium">
                       {order.symbol}
                     </TableCell>
                     <TableCell>
-                      {order.date.toISOString().split('T')[0] +
+                      {order.createdAt.toISOString().split('T')[0] +
                         ' ' +
-                        order.date.toISOString().split('T')[1].split('.')[0]}
+                        order.createdAt.toISOString().split('T')[1].split('.')[0]}
                     </TableCell>
                     <TableCell>{order.price.toString()}</TableCell>
                     <TableCell>{order.quantity}</TableCell>
+                    <TableCell>{Number(order.ack)}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

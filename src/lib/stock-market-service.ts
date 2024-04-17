@@ -31,9 +31,7 @@ export async function startStockMarketService() {
 
         if (body) {
           const [_, symbol, price] = body.split(';');
-          console.log(
-            `StockMarketService (received): Symbol=${symbol} Price=${price}`,
-          );
+          //console.log(`StockMarketService (received): Symbol=${symbol} Price=${price}`);
 
           const frame = client.send(sendHeaders);
           frame.write(body);
