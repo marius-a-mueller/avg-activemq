@@ -64,7 +64,8 @@ export default function Page() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>ID</TableHead>
+                  <TableHead>HID</TableHead>
+                  <TableHead>OID</TableHead>
                   <TableHead className="w-[100px]">Name</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Price</TableHead>
@@ -77,6 +78,9 @@ export default function Page() {
                   <TableRow className="h-14" key={order.id}>
                     <TableCell className="font-medium">
                       {order.stockholderId}
+                    </TableCell>
+                    <TableCell className="font-medium">
+                      {order.orderId}
                     </TableCell>
                     <TableCell className="font-medium">
                       {order.symbol}
