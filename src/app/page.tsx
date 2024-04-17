@@ -98,7 +98,7 @@ export default function Page() {
               </TableBody>
               <TableFooter>
                 <TableRow>
-                  <TableCell colSpan={5}>Total:</TableCell>
+                  <TableCell colSpan={6}>Total:</TableCell>
                   <TableCell className="text-right">
                     {orders?.length} Orders
                   </TableCell>
