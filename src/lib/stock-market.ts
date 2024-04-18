@@ -116,12 +116,11 @@ export function stockMarket(id: number) {
         let currentSym = symbols[i]
         messages.push(id + ';' + currentSym + ';' + price.toFixed(2));
         const stock = {
-          id,
-          currentSym,
+          marketId: id,
+          symbol: currentSym,
           price,
-        }
-        db.stock.create({data: stock}).then(() => revalidatePath('/'));
-      }
+        };
+        db.stock.create({data: stock,}).then(() => revalidatePath('/'));      }
       // sending the messages to the queue
       messages.forEach((message) => {
         log.info(`(sent): ${message}`);
