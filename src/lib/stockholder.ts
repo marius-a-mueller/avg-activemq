@@ -1,7 +1,6 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
 import { db } from './db';
-import { revalidatePath } from 'next/cache';
 import { getLogger } from './logger';
 
 let orderId = 0;
@@ -89,7 +88,7 @@ export async function start(id: number) {
   });
 }
 
-function buyStock(
+async function buyStock(
   client: Client,
   id: number,
   stockmarket: number,
@@ -119,11 +118,9 @@ function buyStock(
     orderId,
   };
 
-  db.order
-    .create({
-      data: order,
-    })
-    .then(() => revalidatePath('/'));
+  await db.order.create({
+    data: order,
+  });
 
   orderId++;
 }

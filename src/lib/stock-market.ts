@@ -2,8 +2,8 @@ import { connect, Client } from 'stompit';
 import { connectOptions } from './utils';
 import { symbols } from './symbols';
 import { getLogger, Logger } from './logger';
-import { revalidatePath } from 'next/cache';
 import { db } from './db';
+import { Stock } from '@prisma/client';
 const course = [421, 176, 881, 170];
 const stockPrices: { [id: number]: number[] } = {};
 let exchangeNum = 0;
@@ -119,7 +119,7 @@ export function stockMarket(id: number) {
           price,
           marketId: id,
         };
-        db.stock.create({ data: stock }).then(() => revalidatePath('/'));
+        createStock({ stock });
       }
       // sending the messages to the queue
       messages.forEach((message) => {
@@ -133,4 +133,12 @@ export function stockMarket(id: number) {
       count += 1;
     }, 4000);
   });
+}
+
+async function createStock({
+  stock,
+}: {
+  stock: Pick<Stock, 'symbol' | 'price' | 'marketId'>;
+}) {
+  await db.stock.create({ data: stock });
 }

@@ -26,6 +26,16 @@ model Stock {
   createdAt DateTime @default(now())
 }
 
+model Price {
+  symbol    String   @id
+  marketId  Int
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@unique([symbol, marketId])
+}
+
 model Log {
   id        Int      @id @default(autoincrement())
   text      String

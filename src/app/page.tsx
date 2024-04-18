@@ -1,6 +1,5 @@
 'use client';
 
-import { getOrders } from '@/actions/getOrders';
 import { Control } from '@/components/control';
 import {
   Card,
@@ -9,39 +8,20 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableFooter,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Orders } from '@/components/orders';
+import { Stocks } from '@/components/stocks';
+import { Prices } from '@/components/prices';
+import { Logs } from '@/components/logs';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 export default function Page() {
-  const {
-    data: orders,
-    refetch,
-    isLoading,
-  } = useQuery({
-    queryFn: async () => await getOrders(),
-  });
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      refetch();
-    }, 1000);
-
-    return () => clearInterval(interval);
-  });
-
   return (
     <div className="flex flex-col gap-4 p-10">
-      <h2 className="font-semibold text-3xl">Stock Message Broker</h2>
+      <div className="flex items-center gap-4">
+        <h2 className="font-semibold text-3xl">Stock Message Broker</h2>
+        <ThemeToggle />
+      </div>
       <div className="flex gap-3">
         <Card>
           <CardHeader>
@@ -53,60 +33,26 @@ export default function Page() {
           </CardContent>
         </Card>
 
-        <Card className="max-h-[600px] w-[1000px] overflow-auto">
-          <CardHeader className="sticky top-0 bg-white z-10">
-            <CardTitle>Orders</CardTitle>
-            <CardDescription>A list of the recent orders</CardDescription>
-          </CardHeader>
-          {isLoading ? (
-            <div className="text-center mt-12">Fetching orders...</div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>HID</TableHead>
-                  <TableHead>OID</TableHead>
-                  <TableHead className="w-[100px]">Name</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Price</TableHead>
-                  <TableHead>Quantity</TableHead>
-                  <TableHead>Ack</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody className="h-[400px] overflow-auto">
-                {orders?.map((order) => (
-                  <TableRow className="h-14" key={order.id}>
-                    <TableCell className="font-medium">
-                      {order.stockholderId}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {order.orderId}
-                    </TableCell>
-                    <TableCell className="font-medium">
-                      {order.symbol}
-                    </TableCell>
-                    <TableCell>
-                      {order.createdAt.toISOString().split('T')[0] +
-                        ' ' +
-                        order.createdAt.toISOString().split('T')[1].split('.')[0]}
-                    </TableCell>
-                    <TableCell>{order.price.toString()}</TableCell>
-                    <TableCell>{order.quantity}</TableCell>
-                    <TableCell>{String(order.ack)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-              <TableFooter>
-                <TableRow>
-                  <TableCell colSpan={6}>Total:</TableCell>
-                  <TableCell className="text-right">
-                    {orders?.length} Orders
-                  </TableCell>
-                </TableRow>
-              </TableFooter>
-            </Table>
-          )}
-        </Card>
+        <Tabs defaultValue="orders">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="orders">Orders</TabsTrigger>
+            <TabsTrigger value="stocks">Stocks</TabsTrigger>
+            <TabsTrigger value="prices">Prices</TabsTrigger>
+            <TabsTrigger value="logs">Logs</TabsTrigger>
+          </TabsList>
+          <TabsContent value="orders">
+            <Orders />
+          </TabsContent>
+          <TabsContent value="stocks">
+            <Stocks />
+          </TabsContent>
+          <TabsContent value="prices">
+            <Prices />
+          </TabsContent>
+          <TabsContent value="logs">
+            <Logs />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
