@@ -70,7 +70,7 @@ function ackStockPurchase(
     destination: queueAddress,
     'content-type': 'text/plain',
   };
-  log.info(`Acknowledge purchase of stock with Order-ID: ${oid}`);
+  log.info(`(sent) ack order-ID: ${oid}`);
   const frame = client.send(sendHeaders);
   frame.write(`${oid}`);
   frame.end();
@@ -107,20 +107,19 @@ export function stockMarket(id: number) {
           stockPrices[id] = course.slice();
         }
         if (!stockPrices[id][i]) {
-          price = course[i] * (0.85 + Math.random() * 0.35); 
+          price = course[i] * (0.85 + Math.random() * 0.35);
           stockPrices[id][i] = price;
         } else {
           // Use the existing price for this stock
           price = stockPrices[id][i];
         }
-        let currentSym = symbols[i]
-        messages.push(id + ';' + currentSym + ';' + price.toFixed(2));
+        messages.push(id + ';' + symbols[i] + ';' + price.toFixed(2));
         const stock = {
-          id,
-          currentSym,
+          symbol: symbols[i],
           price,
-        }
-        db.stock.create({data: stock}).then(() => revalidatePath('/'));
+          marketId: id,
+        };
+        db.stock.create({ data: stock }).then(() => revalidatePath('/'));
       }
       // sending the messages to the queue
       messages.forEach((message) => {

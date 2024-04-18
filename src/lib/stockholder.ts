@@ -40,7 +40,7 @@ export async function start(id: number) {
           return;
         }
         if (!body) return;
-        log.info(`${topicAddress}: (received) ${body}`);
+        log.info(`(received) ${body}`);
         const [stockmarket, symbol, price] = body.split(';');
         const quantity = Math.floor(Math.random() * 10) + 1;
         // buy first stock of every symbol
@@ -48,12 +48,12 @@ export async function start(id: number) {
           buyStock(
             client,
             id,
-            quantity,
             Number(stockmarket),
+            quantity,
             symbol,
             Number(price),
           );
-          log.info(`(sent) ${symbol};${price}`);
+          log.info(`${stockmarket} (sent) ${symbol};${price}`);
         }
 
         client.ack(message);
@@ -70,7 +70,7 @@ export async function start(id: number) {
         log.info('subscribe error ' + err.message);
         return;
       }
-      message.readString('utf-8', function (err, body) {
+      message.readString('utf-8', async function (err, body) {
         if (err) {
           log.error('read message error ' + err.message);
           return;
@@ -78,9 +78,9 @@ export async function start(id: number) {
         if (!body) return;
         log.info(`/queue/Ack${id}: (received): ${body}`);
 
-        db.order.updateMany({
+        await db.order.updateMany({
           data: { ack: true },
-          where: { stockholderId: id, orderId: Number(body) },
+          where: { stockholderId: id },
         });
 
         client.ack(message);
@@ -89,7 +89,7 @@ export async function start(id: number) {
   });
 }
 
-async function buyStock(
+function buyStock(
   client: Client,
   id: number,
   stockmarket: number,
@@ -107,6 +107,10 @@ async function buyStock(
   frame.write(`${id};${orderId};${quantity};${symbol};${price}`);
   frame.end();
 
+  console.error(
+    `${queueAddress} (sent) ${id};${orderId};${quantity};${symbol};${price}`,
+  );
+
   const order = {
     symbol,
     price,
@@ -115,7 +119,7 @@ async function buyStock(
     orderId,
   };
 
-  await db.order
+  db.order
     .create({
       data: order,
     })
