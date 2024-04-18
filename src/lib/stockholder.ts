@@ -2,22 +2,23 @@ import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
 import { db } from './db';
 import { revalidatePath } from 'next/cache';
-import { Order } from '@prisma/client';
+import { getLogger } from './logger';
 
-let orderId = 1;
+let orderId = 0;
+let globalClient: Client | undefined = undefined;
+
+export function disconnect() {
+  if (globalClient) globalClient.disconnect();
+}
 
 export async function start(id: number) {
-  function log(text: string) {
-    console.log('stockholder ' + id + ': ' + text);
-  }
-  function error(text: string) {
-    console.error('stockholder ' + id + ': ' + text);
-  }
+  const log = getLogger(`stockholder ${id}`);
 
   connect(connectOptions, function (err, client) {
-    log('start');
+    globalClient = client;
+    log.info('start');
     if (err) {
-      error('connect error ' + err.message);
+      log.error('connect error ' + err.message);
       return;
     }
 
@@ -30,16 +31,16 @@ export async function start(id: number) {
 
     client.subscribe(subscribeHeaders, function (err, message) {
       if (err) {
-        log('subscribe error ' + err.message);
+        log.info('subscribe error ' + err.message);
         return;
       }
       message.readString('utf-8', function (err, body) {
         if (err) {
-          error('read message error ' + err.message);
+          log.error('read message error ' + err.message);
           return;
         }
         if (!body) return;
-        log(`${topicAddress}: received message: ${body}`);
+        log.info(`${topicAddress}: (received) ${body}`);
         const [stockmarket, symbol, price] = body.split(';');
         const quantity = Math.floor(Math.random() * 10) + 1;
         // buy first stock of every symbol
@@ -52,7 +53,7 @@ export async function start(id: number) {
             symbol,
             Number(price),
           );
-          log(`sent message: ${symbol};${price}`);
+          log.info(`(sent) ${symbol};${price}`);
         }
 
         client.ack(message);
@@ -66,23 +67,21 @@ export async function start(id: number) {
 
     client.subscribe(ackSubscribeHeaders, function (err, message) {
       if (err) {
-        log('subscribe error ' + err.message);
+        log.info('subscribe error ' + err.message);
         return;
       }
       message.readString('utf-8', function (err, body) {
         if (err) {
-          error('read message error ' + err.message);
+          log.error('read message error ' + err.message);
           return;
         }
         if (!body) return;
-        log(`/queue/Ack${id}: received message: ${body}`);
+        log.info(`/queue/Ack${id}: (received): ${body}`);
 
         db.order.updateMany({
           data: { ack: true },
           where: { stockholderId: id, orderId: Number(body) },
         });
-
-        log(`/queue/Ack${id}: ack order: ${body}`);
 
         client.ack(message);
       });

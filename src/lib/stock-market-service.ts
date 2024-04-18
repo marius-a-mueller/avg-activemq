@@ -1,7 +1,15 @@
-import { connect } from 'stompit';
+import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
+import { getLogger } from './logger';
+
+let globalClient: Client | undefined = undefined;
+
+export function disconnect() {
+  if (globalClient) globalClient.disconnect();
+}
 
 export async function startStockMarketService() {
+  const log = getLogger(`stockmarketservice`);
   const subscribeHeaders = {
     destination: '/queue/StockMarketPrices',
     'content-type': 'text/plain',
@@ -14,29 +22,27 @@ export async function startStockMarketService() {
   };
 
   connect(connectOptions, async function (error, client) {
+    globalClient = client;
     if (error) {
-      return console.log('connect error ' + error.message);
+      return log.info('connect error ' + error.message);
     }
-    console.log('connected to StockMarketService');
+    log.info('connected to StockMarketService');
 
     client.subscribe(subscribeHeaders, function (error, message) {
       if (error) {
-        return console.log('subscribe error ' + error.message);
+        return log.info('subscribe error ' + error.message);
       }
 
       message.readString('utf-8', function (error, body) {
         if (error) {
-          return console.log('read message error ' + error.message);
+          return log.info('read message error ' + error.message);
         }
 
         if (body) {
-          const [_, symbol, price] = body.split(';');
-          //console.log(`StockMarketService (received): Symbol=${symbol} Price=${price}`);
-
           const frame = client.send(sendHeaders);
           frame.write(body);
           frame.end();
-          console.log(`StockMarketService (sent): ${body}`);
+          log.info(`(sent): ${body}`);
         }
 
         client.ack(message);
