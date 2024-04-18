@@ -2,8 +2,10 @@ import { connect, Client } from 'stompit';
 import { connectOptions } from './utils';
 import { symbols } from './symbols';
 import { getLogger, Logger } from './logger';
-
+import { revalidatePath } from 'next/cache';
+import { db } from './db';
 const course = [421, 176, 881, 170];
+const stockPrices: { [id: number]: number[] } = {};
 let exchangeNum = 0;
 let globalClient: Client | undefined = undefined;
 
@@ -33,12 +35,12 @@ export async function listenM(id: number, log: Logger) {
     try {
       client.subscribe(subscribeHeaders, function (error, message) {
         if (error) {
-          log.error(`Couldn't subscribe to the queue: ${error.message}`);
+          console.error(`Couldn't subscribe to the queue: ${error.message}`);
           return;
         }
         message.readString('utf-8', function (error, body) {
           if (error) {
-            log.error(`Error while reading the message: ${error.message}`);
+            console.error(`Error while reading the message: ${error.message}`);
             return;
           }
           if (body) {
@@ -78,7 +80,6 @@ function ackStockPurchase(
 export function stockMarket(id: number) {
   const log = getLogger(`stockmarket ${id}`);
   listenM(id, log);
-  log.info('Stock Exchange created with id: ' + id);
   const sendHeaders = {
     destination: '/queue/StockMarketPrices',
     'content-type': 'text/plain',
@@ -99,10 +100,27 @@ export function stockMarket(id: number) {
       }
 
       // creating the messages
-      //TODO fix
-      for (let i = 0; i < 1; i++) {
-        course[i] = course[i] * (0.8 + Math.random() * 0.4); //
-        messages.push(id + ';' + symbols[i] + ';' + course[i].toFixed(2));
+      for (let i = 0; i < course.length; i++) {
+        let price: number;
+        // Checks if the Market has it's own Stock Prices
+        if (!stockPrices[id]) {
+          stockPrices[id] = course.slice();
+        }
+        if (!stockPrices[id][i]) {
+          price = course[i] * (0.85 + Math.random() * 0.35); 
+          stockPrices[id][i] = price;
+        } else {
+          // Use the existing price for this stock
+          price = stockPrices[id][i];
+        }
+        let currentSym = symbols[i]
+        messages.push(id + ';' + currentSym + ';' + price.toFixed(2));
+        const stock = {
+          id,
+          currentSym,
+          price,
+        }
+        db.stock.create({data: stock}).then(() => revalidatePath('/'));
       }
       // sending the messages to the queue
       messages.forEach((message) => {
