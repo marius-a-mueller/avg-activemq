@@ -27,13 +27,13 @@ model Stock {
 }
 
 model Price {
-  symbol    String   @id
+  symbol    String
   marketId  Int
   price     Float
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([symbol, marketId])
+  @@id([symbol, marketId])
 }
 
 model Log {
