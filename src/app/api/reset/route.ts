@@ -8,7 +8,6 @@ export async function GET() {
     db.order.deleteMany(),
     db.log.deleteMany(),
     db.stock.deleteMany(),
-    db.price.deleteMany(),
   ]);
 
   stockholderDisconnect();

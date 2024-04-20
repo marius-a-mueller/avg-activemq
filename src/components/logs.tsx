@@ -29,7 +29,7 @@ export const Logs = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
-    }, 200);
+    }, 500);
 
     return () => clearInterval(interval);
   });

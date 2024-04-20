@@ -30,12 +30,10 @@ export const Prices = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
-    }, 200);
+    }, 500);
 
     return () => clearInterval(interval);
   });
-
-  console.log(prices);
 
   return (
     <Card className="max-h-[600px] w-[1000px] overflow-auto">
@@ -51,21 +49,24 @@ export const Prices = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Market ID</TableHead>
               <TableHead className="w-[300px]">Name</TableHead>
               <TableHead>Updated</TableHead>
-              <TableHead>Price</TableHead>
+              <TableHead>Average Price</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody className="h-[400px] overflow-auto">
-            {prices?.map((price) => (
+            {prices?.map((price: any) => (
               <TableRow className="h-14" key={price.symbol}>
-                <TableCell className="font-medium">{price.marketId}</TableCell>
                 <TableCell className="font-medium">{price.symbol}</TableCell>
                 <TableCell>
-                  {price.updatedAt?.toISOString().split('T')[0] +
+                  {new Date(Number(price.updatedAt))
+                    .toISOString()
+                    .split('T')[0] +
                     ' ' +
-                    price.updatedAt?.toISOString().split('T')[1].split('.')[0]}
+                    new Date(Number(price.updatedAt))
+                      .toISOString()
+                      .split('T')[1]
+                      .split('.')[0]}
                 </TableCell>
                 <TableCell>${price.price?.toString() ?? 'N/A'}</TableCell>
               </TableRow>

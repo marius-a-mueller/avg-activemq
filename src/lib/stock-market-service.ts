@@ -1,7 +1,6 @@
 import { Client, connect } from 'stompit';
 import { connectOptions } from './utils';
-import { getLogger, Logger } from './logger';
-import { db } from './db';
+import { getLogger } from './logger';
 
 let globalClient: Client | undefined = undefined;
 
@@ -20,7 +19,7 @@ const sendHeaders = {
   'content-type': 'text/plain',
 };
 
-export async function startStockMarketService() {
+export function startStockMarketService() {
   const log = getLogger(`stockmarketservice`);
 
   connect(connectOptions, async function (error, client) {
@@ -41,47 +40,14 @@ export async function startStockMarketService() {
         }
 
         if (body) {
-          listPrice({ client, body, log });
+          const frame = client.send(sendHeaders);
+          frame.write(body);
+          frame.end();
+          log.info(`(sent): ${body}`);
         }
 
         client.ack(message);
       });
     });
-  });
-}
-
-async function listPrice({
-  client,
-  body,
-  log,
-}: {
-  client: Client;
-  body: string;
-  log: Logger;
-}) {
-  const [marketId, symbol, price] = body.split(';');
-
-  const frame = client.send(sendHeaders);
-  frame.write(body);
-  frame.end();
-  log.info(`(sent): ${body}`);
-
-  const assignedMarketId = parseInt(marketId) ?? 0;
-
-  await db.price.upsert({
-    update: {
-      price: parseFloat(price),
-    },
-    create: {
-      marketId: assignedMarketId,
-      symbol,
-      price: parseFloat(price),
-    },
-    where: {
-      symbol_marketId: {
-        marketId: assignedMarketId,
-        symbol,
-      },
-    },
   });
 }

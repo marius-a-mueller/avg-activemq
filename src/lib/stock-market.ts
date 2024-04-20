@@ -140,5 +140,18 @@ async function createStock({
 }: {
   stock: Pick<Stock, 'symbol' | 'price' | 'marketId'>;
 }) {
-  await db.stock.create({ data: stock });
+  await db.stock.upsert({
+    update: {
+      price: stock.price,
+    },
+    create: {
+      ...stock,
+    },
+    where: {
+      symbol_marketId: {
+        marketId: stock.marketId,
+        symbol: stock.symbol,
+      }
+    },
+  });
 }

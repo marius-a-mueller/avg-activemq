@@ -29,7 +29,7 @@ export const Orders = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
-    }, 1000);
+    }, 500);
 
     return () => clearInterval(interval);
   });

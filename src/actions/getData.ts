@@ -13,17 +13,21 @@ export const getOrders = async () => {
 export const getStocks = async () => {
   return await db.stock.findMany({
     orderBy: {
-      createdAt: 'desc',
+      updatedAt: 'desc',
     },
   });
 };
 
 export const getPrices = async () => {
-  return await db.price.findMany({
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
+  const result = await db.$queryRaw`SELECT 
+    symbol,
+    MAX(updatedAt) as updatedAt,
+    AVG(price) AS price
+  FROM 
+    Stock
+  GROUP BY 
+    symbol`;
+  return result as any;
 };
 
 export const getLogs = async () => {

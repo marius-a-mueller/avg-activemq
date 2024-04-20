@@ -29,7 +29,7 @@ export const Stocks = () => {
   useEffect(() => {
     const interval = setInterval(() => {
       refetch();
-    }, 200);
+    }, 500);
 
     return () => clearInterval(interval);
   });
@@ -54,7 +54,7 @@ export const Stocks = () => {
           </TableHeader>
           <TableBody className="h-[400px] overflow-auto">
             {stocks?.map((stock) => (
-              <TableRow className="h-14" key={stock.id}>
+              <TableRow className="h-14" key={stock.symbol}>
                 <TableCell className="font-medium">{stock.marketId}</TableCell>
                 <TableCell className="font-medium">{stock.symbol}</TableCell>
                 <TableCell>
