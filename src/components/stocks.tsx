@@ -55,7 +55,7 @@ export const Stocks = () => {
           </TableHeader>
           <TableBody className="h-[400px] overflow-auto">
             {stocks?.map((stock) => (
-              <TableRow className="h-14" key={stock.symbol}>
+              <TableRow className="h-14" key={stock.symbol + stock.marketId}>
                 <TableCell className="font-medium">{stock.marketId}</TableCell>
                 <TableCell className="font-medium">{stock.symbol}</TableCell>
                 <TableCell>
