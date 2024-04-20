@@ -111,6 +111,7 @@ export function stockMarket(id: number) {
           stockPrices[id][i] = price;
         } else {
           // Use the existing price for this stock
+          stockPrices[id][i] = stockPrices[id][i] * (0.85 + Math.random() * 0.35);
           price = stockPrices[id][i];
         }
         messages.push(id + ';' + symbols[i] + ';' + price.toFixed(2));
