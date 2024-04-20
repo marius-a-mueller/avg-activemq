@@ -24,6 +24,7 @@ export const Orders = () => {
     isLoading,
   } = useQuery({
     queryFn: async () => await getOrders(),
+    queryKey: ['orders'],
   });
 
   useEffect(() => {
@@ -68,7 +69,7 @@ export const Orders = () => {
                     ' ' +
                     order.createdAt.toISOString().split('T')[1].split('.')[0]}
                 </TableCell>
-                <TableCell>${order.price?.toString() ?? 'N/A'}</TableCell>
+                <TableCell>${order.price?.toFixed(2) ?? 'N/A'}</TableCell>
                 <TableCell>{order.quantity}</TableCell>
                 <TableCell>{String(order.ack)}</TableCell>
               </TableRow>

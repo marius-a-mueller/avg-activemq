@@ -68,7 +68,7 @@ export const Prices = () => {
                       .split('T')[1]
                       .split('.')[0]}
                 </TableCell>
-                <TableCell>${price.price?.toString() ?? 'N/A'}</TableCell>
+                <TableCell>${price.price?.toFixed(2) ?? 'N/A'}</TableCell>
               </TableRow>
             ))}
           </TableBody>

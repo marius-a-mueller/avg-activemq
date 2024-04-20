@@ -24,6 +24,7 @@ export const Logs = () => {
     isLoading,
   } = useQuery({
     queryFn: async () => await getLogs(),
+    queryKey: ['logs'],
   });
 
   useEffect(() => {

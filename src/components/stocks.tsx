@@ -24,6 +24,7 @@ export const Stocks = () => {
     isLoading,
   } = useQuery({
     queryFn: async () => await getStocks(),
+    queryKey: ['stocks'],
   });
 
   useEffect(() => {
@@ -62,7 +63,7 @@ export const Stocks = () => {
                     ' ' +
                     stock.createdAt.toISOString().split('T')[1].split('.')[0]}
                 </TableCell>
-                <TableCell>${stock.price?.toString() ?? 'N/A'}</TableCell>
+                <TableCell>${stock.price?.toFixed(2) ?? 'N/A'}</TableCell>
               </TableRow>
             ))}
           </TableBody>
